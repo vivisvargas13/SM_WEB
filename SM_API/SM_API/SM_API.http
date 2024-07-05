@@ -1,4 +1,4 @@
-@SM_API_HostAddress = http://localhost:5164
+@SM_API_HostAddress = http://localhost:5135
 
 GET {{SM_API_HostAddress}}/weatherforecast/
 Accept: application/json

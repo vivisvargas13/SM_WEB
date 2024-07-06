@@ -1,28 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
+using SM_WEB.Entities;
 using SM_WEB.Models;
 using System.Diagnostics;
 
 namespace SM_WEB.Controllers
 {
-    public class HomeController : Controller
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public class HomeController(IUsuarioModel iUsuarioModel) : Controller
     {
+        //abrir vistas y son llamados por un hipervinculo
+        [HttpGet]
         public IActionResult Index()
-        {
-            IUsuarioModel model = new IUsuarioModel();
-            model.IniciarSesion();
-
-            return View(model);
-        }
-
-        public IActionResult Privacy()
         {
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        //realizar las acciones de las vistas que abrimos
+        [HttpPost]
+        public IActionResult Index(Usuario usuario)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            iUsuarioModel.IniciarSesion(usuario);
+
+            return View();
         }
     }
 }

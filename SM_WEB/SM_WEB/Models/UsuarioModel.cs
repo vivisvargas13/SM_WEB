@@ -8,14 +8,14 @@ namespace SM_WEB.Models
         {
             string url = "https://localhost:7208/api/Usuario/RegistrarUsuario";
             JsonContent body = JsonContent.Create(usuario);
-            var result = http.PostAsync(url, body);
+            var result = http.PostAsync(url, body).Result;
         }
 
         public void IniciarSesion(Usuario usuario)
         {
             string url = "https://localhost:7208/api/Usuario/IniciarSesion";
             JsonContent body = JsonContent.Create(usuario);
-            var result = http.PostAsync(url, body);
+            var result = http.PostAsync(url, body).Result;
         }
     }
 }

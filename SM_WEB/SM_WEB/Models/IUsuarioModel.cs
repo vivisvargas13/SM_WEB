@@ -6,6 +6,6 @@ namespace SM_WEB.Models
     {
         void RegistrarUsuario(Usuario usuario);
 
-        void IniciarSesion(Usuario usuario);
+        Respuesta IniciarSesion(Usuario usuario);
     }
 }

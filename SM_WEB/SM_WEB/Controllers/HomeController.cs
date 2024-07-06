@@ -19,9 +19,20 @@ namespace SM_WEB.Controllers
         [HttpPost]
         public IActionResult Index(Usuario usuario)
         {
-            iUsuarioModel.IniciarSesion(usuario);
+            var respuesta = iUsuarioModel.IniciarSesion(usuario);
+
+            if (respuesta.Codigo == 1)
+                return RedirectToAction("Principal","Home");
+                else
+                ViewBag.msj =   respuesta.Mensaje;
 
             return View();
         }
+        [HttpGet]
+        public IActionResult Principal()
+        {
+            return View();
+        }
+
     }
 }

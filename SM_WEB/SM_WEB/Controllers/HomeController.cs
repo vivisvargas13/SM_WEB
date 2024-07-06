@@ -6,16 +6,12 @@ namespace SM_WEB.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
         public IActionResult Index()
         {
-            return View();
+            IUsuarioModel model = new IUsuarioModel();
+            model.IniciarSesion();
+
+            return View(model);
         }
 
         public IActionResult Privacy()

@@ -2,13 +2,17 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using SM_API.Entities;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace SM_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsuarioController : ControllerBase
+    public class UsuarioController(IConfiguration iConfiguration) : ControllerBase
     {
         [HttpPost]
         [Route("RegistrarUsuario")]
@@ -17,7 +21,7 @@ namespace SM_API.Controllers
         {
             Respuesta resp = new Respuesta();
 
-            using (var database = new SqlConnection("Server=.; Database=Sabados; Trusted_Connection=True; TrustServerCertificate=True"))
+            using (var database = new SqlConnection(iConfiguration.GetSection("ConnectionStrings:DefaultConnection").Value))
             {
                 var result = await database.ExecuteAsync("RegistrarUsuario", new { usuario.Identificacion, usuario.Correo, usuario.Contrasenna, usuario.Nombre }, commandType: System.Data.CommandType.StoredProcedure);
 
@@ -47,14 +51,16 @@ namespace SM_API.Controllers
         {
             Respuesta resp = new Respuesta();
 
-            using (var database = new SqlConnection("Server=.; Database=Sabados; Trusted_Connection=True; TrustServerCertificate=True"))
+            using (var database = new SqlConnection(iConfiguration.GetSection("ConnectionStrings:DefaultConnection").Value))
             {
-                var result = await database.QueryAsync<Usuario>("IniciarUsuario",
+                var result = await database.QueryFirstOrDefaultAsync<Usuario>("IniciarUsuario",
                     new { usuario.Correo, usuario.Contrasenna },
                     commandType: System.Data.CommandType.StoredProcedure);
 
-                if (result.Count() < 0)
+                if (result != null)
                 {
+                    result.Token = GenerarToken(result.Consecutivo);
+
                     resp.Codigo = 1;
                     resp.Mensaje = "Ok";
                     resp.Contenido = true;
@@ -69,6 +75,23 @@ namespace SM_API.Controllers
                     return Ok(resp);
                 }
             }
+        }
+
+        public string GenerarToken(int Consecutivo)
+        {
+            string SecretKey = iConfiguration.GetSection("Llaves:SecretKey").Value!;
+            List<Claim> claims = new List<Claim>();
+            claims.Add(new Claim(ClaimTypes.Name, Consecutivo.ToString()));
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(30),
+                signingCredentials: cred);
+
+            return new JwtSecurityTokenHandler().WriteToken(token); 
         }
     }
 }
